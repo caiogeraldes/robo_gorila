@@ -1,10 +1,45 @@
 #! /usr/bin/env sh
-while [[ true ]]; do
-	read input
-	cowsay -f ./gorilla.cow "$input"
-	cowsay "..."
-	if [[ $input == "xau" ]]; then
-		exit 0
-	fi
-done
 
+declare -a BLA_active_loading_animation
+
+
+# ROUBEI DAQUI: https://github.com/Silejonu/bash_loading_animations
+play_loading_animation_loop() {
+  while true ; do
+    for frame in "${BLA_active_loading_animation[@]}" ; do
+      printf "\r%s" "${frame}"
+      sleep "${BLA_loading_animation_frame_interval}"
+    done
+  done
+}
+
+start_loading_animation() {
+  BLA_active_loading_animation=( "${@}" )
+  BLA_loading_animation_frame_interval="${BLA_active_loading_animation[0]}"
+  unset "BLA_active_loading_animation[0]"
+  tput civis # Hide the terminal cursor
+  play_loading_animation_loop &
+  BLA_loading_animation_pid="${!}"
+}
+
+stop_loading_animation() {
+  kill "${BLA_loading_animation_pid}" &> /dev/null
+  echo -e "\033[2K"
+  tput cnorm # Restore the terminal cursor
+}
+
+BLA_metro=( 0.2 '[    ]' '[=   ]' '[==  ]' '[=== ]' '[ ===]' '[  ==]' '[   =]' )
+
+while [[ true ]]; do
+  # TODO: Apagar linha do input depois do enter, não consegui com o tput
+  read -p "> " input
+  cowsay -f ./gorilla.cow "$input"
+  if [[ $input == "xau" ]]; then
+    cowsay "..."
+    exit 0
+  fi
+  start_loading_animation "${BLA_metro[@]}"
+  expr ${RANDOM:0:2} / 3 | xargs sleep
+  stop_loading_animation
+  cowsay "..."
+done
