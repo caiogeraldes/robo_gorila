@@ -1,10 +1,10 @@
 #! /usr/bin/env sh
 while [[ true ]]; do
 	read input
+	cowsay -f ./gorilla.cow "$input"
+	cowsay "..."
 	if [[ $input == "xau" ]]; then
 		exit 0
 	fi
-	cowsay -f ./gorilla.cow "$input"
-	cowsay "..."
 done
 
